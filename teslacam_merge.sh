@@ -3,12 +3,35 @@
 SCRATCH=$(mktemp -d -t teslacam.XXXXXXXXXX)
 function finish {
   rm -rf "${SCRATCH}"
+
+  if [ ! -z "${WSL_MNT}" ]; then
+    echo "Unmounting ${WSL_MNT}"
+    sleep 5   # delay here to hopefully prevent "drive is busy message"
+    sudo umount -l ${WSL_MNT}
+  fi
 }
 trap finish EXIT
 
-USBPATH=$(readlink -f /dev/disk/by-id/usb-*-0:0* | \
+if grep -q Microsoft /proc/version; then
+  WSL="true"
+  WSL_MNT="/mnt/teslacam_mount"
+  sudo mkdir -p ${WSL_MNT}
+
+  echo "Detected Windows Subsystem for Linux"
+  echo "Looking for USB drives with \"Tesla\" in their drive name"
+  WIN_DRIVE=$(WMIC.exe logicaldisk where drivetype=2 get DeviceID,VolumeName | grep Tesla | awk '{print $1}')
+  if [ ! -z "${WIN_DRIVE}" ]; then
+    echo "Mounting TeslaCam (${WIN_DRIVE}) at ${WSL_MNT}"
+      sudo mount -t drvfs "${WIN_DRIVE}" ${WSL_MNT}
+  fi
+  USBPATH=${WSL_MNT}
+else
+  echo "Detected native Linux"
+  USBPATH=$(readlink -f /dev/disk/by-id/usb-*-0:0* | \
           while read dev;do mount | grep "$dev\b" | \
           awk '{print $3}';done)
+fi
+
 TESLACAM=${USBPATH}/TeslaCam/SavedClips
 
 if [[ ! -d ${TESLACAM} ]]; then
@@ -16,6 +39,8 @@ if [[ ! -d ${TESLACAM} ]]; then
     echo "Is USB mounted?"
     exit 1
 fi
+
+echo "TESLACAM directory: ${TESLACAM}"
 
 DIRS=$(find ${TESLACAM} -maxdepth 1 -type d | tail -n +2)
 
