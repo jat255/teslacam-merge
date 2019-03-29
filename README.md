@@ -22,10 +22,10 @@ installed, and `ffmpeg` is installed into the subsystem.
 In this case, the connected USB drives will be probed with the `WMIC.exe`
 Windows tool, and any drive containing "`Tesla`" in the volume name will
 be mounted into the WSL system and processed as desribed above.
-If all the files in this repo (`autorun.inf`, the icon, and the script)
-are copied into the root of the TeslaCam drive, the script should run
-automatically in WSL when the drive is inserted into the computer (depending
-on your computer's security settings).
+If all the files in this repo are copied into the root of the TeslaCam drive,
+the script can be run easily by double-clicking on `teslacam_merge.bat`. This
+step is necessary because AutoRun is disabled on USB drives in modern versions
+of Windows due to security concerns.
 
 ## Other options
 
