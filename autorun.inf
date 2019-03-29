@@ -1,0 +1,6 @@
+[autorun]
+;Open=wsl.exe teslacam_merge.sh
+Icon=TeslaCam.ico
+Label=TeslaCam Video Merging
+ShellExecute=wsl.exe teslacam_merge.sh
+UseAutoPlay=1
